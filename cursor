@@ -1,6 +1,6 @@
 1.隐形游标：是在select、delete等sql语句被使用后自动被调用的
   
-常用的属性：
+常用的属性：隐形游标的常用属性更像是为了检查游标有没有被成功使用
 SQL%FOUND：如果DML语句影响了至少一行或SELECT INTO成功返回数据，则返回TRUE。
 SQL%NOTFOUND：如果DML语句没有影响任何行或SELECT INTO未返回数据，则返回TRUE。
 SQL%ROWCOUNT：返回DML语句影响的行数。
