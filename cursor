@@ -1,0 +1,209 @@
+1.隐形游标：是在select、delete等sql语句被使用后自动被调用的
+  
+常用的属性：
+SQL%FOUND：如果DML语句影响了至少一行或SELECT INTO成功返回数据，则返回TRUE。
+SQL%NOTFOUND：如果DML语句没有影响任何行或SELECT INTO未返回数据，则返回TRUE。
+SQL%ROWCOUNT：返回DML语句影响的行数。
+SQL%ISOPEN：总是返回FALSE，因为隐式游标在执行后立即关闭。
+
+使用方式：
+DECLARE
+    v_emp_id employees.employee_id%TYPE;
+BEGIN
+    -- 使用SELECT INTO语句（隐式游标）
+    SELECT employee_id INTO v_emp_id FROM employees WHERE last_name = '张三';
+
+    IF SQL%FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id);
+        DBMS_OUTPUT.PUT_LINE('受影响的行数: ' || SQL%ROWCOUNT);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('未找到匹配的员工。');
+    END IF;
+END;
+
+2.显示游标：自己创建的游标：使用cursor关键字
+  基本流程：
+声明游标：定义游标及其关联的查询语句。
+打开游标：执行查询，获取结果集。
+获取数据：从游标中逐行提取数据。
+关闭游标：释放游标相关的资源。
+  
+游标属性：
+cursor_name%FOUND：FETCH后，如果成功获取到数据，则返回TRUE。
+cursor_name%NOTFOUND：FETCH后，如果未获取到数据，则返回TRUE。
+cursor_name%ROWCOUNT：返回已获取的行数。
+cursor_name%ISOPEN：如果游标已打开，则返回TRUE
+
+
+DECLARE
+    -- 声明游标
+    CURSOR emp_cursor IS
+        SELECT employee_id, first_name, last_name FROM employees WHERE department_id = 10;
+
+    -- 定义变量来存储提取的数据
+    v_emp_id      employees.employee_id%TYPE;
+    v_first_name  employees.first_name%TYPE;
+    v_last_name   employees.last_name%TYPE;
+BEGIN
+    -- 打开游标
+    OPEN emp_cursor;
+
+    -- 循环获取数据
+    LOOP
+        FETCH emp_cursor INTO v_emp_id, v_first_name, v_last_name;
+
+        EXIT WHEN emp_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id || ', 姓名: ' || v_first_name || ' ' || v_last_name);
+    END LOOP;
+
+    -- 关闭游标
+    CLOSE emp_cursor;
+END;
+
+
+3.游标 FOR 循环：游标FOR循环是一种简化的游标处理方式，无需显式地打开、获取和关闭游标。
+  举例：
+
+DECLARE
+    CURSOR emp_cursor IS
+        SELECT employee_id, first_name, last_name FROM employees WHERE department_id = 10;
+BEGIN
+    FOR emp_rec IN emp_cursor LOOP
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || emp_rec.employee_id || ', 姓名: ' || emp_rec.first_name || ' ' || emp_rec.last_name);
+    END LOOP;
+END;
+
+对比：使用未声明的游标（直接在FOR循环中定义查询）
+BEGIN
+    FOR emp_rec IN (SELECT employee_id, first_name, last_name FROM employees WHERE department_id = 10) LOOP
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || emp_rec.employee_id || ', 姓名: ' || emp_rec.first_name || ' ' || emp_rec.last_name);
+    END LOOP;
+END;
+
+4.参数化游标
+
+DECLARE
+    -- 声明带参数的游标
+    CURSOR emp_cursor(p_department_id NUMBER) IS
+        SELECT employee_id, first_name, last_name FROM employees WHERE department_id = p_department_id;
+BEGIN
+    -- 使用游标，传递部门ID参数
+    FOR emp_rec IN emp_cursor(20) LOOP
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || emp_rec.employee_id || ', 姓名: ' || emp_rec.first_name || ' ' || emp_rec.last_name);
+    END LOOP;
+END;
+
+5.REF CURSOR（可变游标）：
+弱类型 REF CURSOR：不指定返回类型。
+强类型 REF CURSOR：指定返回类型，提供了更好的类型检查。
+
+5.1弱类型 REF CURSOR 示例
+  
+  DECLARE
+    TYPE weak_ref_cursor IS REF CURSOR;
+    v_emp_cursor weak_ref_cursor;
+    v_emp_rec    employees%ROWTYPE;
+BEGIN
+    OPEN v_emp_cursor FOR SELECT * FROM employees WHERE department_id = 30;
+
+    LOOP
+        FETCH v_emp_cursor INTO v_emp_rec;
+        EXIT WHEN v_emp_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_rec.employee_id || ', 姓名: ' || v_emp_rec.first_name || ' ' || v_emp_rec.last_name);
+    END LOOP;
+
+    CLOSE v_emp_cursor;
+END;
+
+5.2强类型 REF CURSOR 示例
+DECLARE
+    TYPE strong_ref_cursor IS REF CURSOR RETURN employees%ROWTYPE;
+    v_emp_cursor strong_ref_cursor;
+    v_emp_rec    employees%ROWTYPE;
+BEGIN
+    OPEN v_emp_cursor FOR SELECT * FROM employees WHERE department_id = 30;
+
+    LOOP
+        FETCH v_emp_cursor INTO v_emp_rec;
+        EXIT WHEN v_emp_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_rec.employee_id || ', 姓名: ' || v_emp_rec.first_name || ' ' || v_emp_rec.last_name);
+    END LOOP;
+
+    CLOSE v_emp_cursor;
+END;
+
+6.游标属性
+6.1 常用游标属性
+cursor_name%FOUND
+cursor_name%NOTFOUND
+cursor_name%ROWCOUNT
+cursor_name%ISOPEN
+
+举例：
+DECLARE
+    CURSOR emp_cursor IS
+        SELECT employee_id FROM employees WHERE department_id = 10;
+    v_emp_id employees.employee_id%TYPE;
+BEGIN
+    OPEN emp_cursor;
+
+    LOOP
+        FETCH emp_cursor INTO v_emp_id;
+
+        EXIT WHEN emp_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id);
+        DBMS_OUTPUT.PUT_LINE('已提取行数: ' || emp_cursor%ROWCOUNT);
+    END LOOP;
+
+    IF emp_cursor%ISOPEN THEN
+        DBMS_OUTPUT.PUT_LINE('游标仍然打开。');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('游标已关闭。');
+    END IF;
+
+    CLOSE emp_cursor;
+END;
+
+7. 异常处理中的游标：在处理异常时，确保游标被正确关闭以释放资源。
+
+  DECLARE
+    CURSOR emp_cursor IS
+        SELECT employee_id, salary FROM employees WHERE department_id = 10;
+    v_emp_id employees.employee_id%TYPE;
+    v_salary employees.salary%TYPE;
+BEGIN
+    OPEN emp_cursor;
+
+    LOOP
+        FETCH emp_cursor INTO v_emp_id, v_salary;
+
+        EXIT WHEN emp_cursor%NOTFOUND;
+
+        -- 假设薪水不能超过10000，否则引发异常
+        IF v_salary > 10000 THEN
+            RAISE_APPLICATION_ERROR(-20001, '薪水超过限制');
+        END IF;
+
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id || ', 薪水: ' || v_salary);
+    END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF emp_cursor%ISOPEN THEN
+            CLOSE emp_cursor;
+        END IF;
+        DBMS_OUTPUT.PUT_LINE('发生异常: ' || SQLERRM);
+        RAISE;
+END;
+
+8. 游标的使用建议
+资源管理：始终确保游标在使用后被关闭，特别是在异常处理块中。
+性能考虑：避免在循环中频繁打开和关闭游标，这会影响性能。
+简化代码：能使用游标FOR循环的情况下，尽量使用它来简化代码。
+类型匹配：在声明游标变量时，使用表列的%TYPE或%ROWTYPE，确保类型一致。
+参数化游标：使用参数化游标增强灵活性，避免重复代码。
+
+  
