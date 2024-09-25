@@ -1,0 +1,204 @@
+1.条件控制结构
+1.1IF-THEN
+DECLARE
+    v_salary NUMBER := 5000;
+BEGIN
+    IF v_salary > 4000 THEN
+        DBMS_OUTPUT.PUT_LINE('薪水超过4000');
+    END IF;
+END;
+
+1.2IF-THEN-ELSE
+DECLARE
+    v_salary NUMBER := 3500;
+BEGIN
+    IF v_salary > 4000 THEN
+        DBMS_OUTPUT.PUT_LINE('薪水超过4000');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('薪水不超过4000');
+    END IF;
+END;
+
+1.3IF-THEN-ELSIF-ELSE
+
+DECLARE
+    v_grade CHAR(1) := 'B';
+BEGIN
+    IF v_grade = 'A' THEN
+        DBMS_OUTPUT.PUT_LINE('优秀');
+    ELSIF v_grade = 'B' THEN
+        DBMS_OUTPUT.PUT_LINE('良好');
+    ELSIF v_grade = 'C' THEN
+        DBMS_OUTPUT.PUT_LINE('及格');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('不及格');
+    END IF;
+END;
+
+1.4CASE 语句:简单CASE和搜索CASE。
+1.4.1简单 CASE 语句
+DECLARE
+    v_grade CHAR(1) := 'B';
+BEGIN
+    CASE v_grade
+        WHEN 'A' THEN
+            DBMS_OUTPUT.PUT_LINE('优秀');
+        WHEN 'B' THEN
+            DBMS_OUTPUT.PUT_LINE('良好');
+        WHEN 'C' THEN
+            DBMS_OUTPUT.PUT_LINE('及格');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('不及格');
+    END CASE;
+END;
+
+1.4.2搜索 CASE 语句
+DECLARE
+    v_score NUMBER := 85;
+BEGIN
+    CASE
+        WHEN v_score >= 90 THEN
+            DBMS_OUTPUT.PUT_LINE('优秀');
+        WHEN v_score >= 80 THEN
+            DBMS_OUTPUT.PUT_LINE('良好');
+        WHEN v_score >= 60 THEN
+            DBMS_OUTPUT.PUT_LINE('及格');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('不及格');
+    END CASE;
+END;
+
+2.循环控制结构
+2.1LOOP...END LOOP
+DECLARE
+    v_counter NUMBER := 1;
+BEGIN
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('计数器值：' || v_counter);
+        v_counter := v_counter + 1;
+        EXIT WHEN v_counter > 5;
+    END LOOP;
+END;
+
+2.2WHILE LOOP
+DECLARE
+    v_counter NUMBER := 1;
+BEGIN
+    WHILE v_counter <= 5 LOOP
+        DBMS_OUTPUT.PUT_LINE('计数器值：' || v_counter);
+        v_counter := v_counter + 1;
+    END LOOP;
+END;
+
+2.3FOR LOOP
+DECLARE
+BEGIN
+  -- 使用FOR循环遍历1到5
+  FOR i IN 1..5 LOOP
+    DBMS_OUTPUT.PUT_LINE('当前循环次数: ' || i);
+  END LOOP;
+END;
+
+2.4LOOP 控制语句：EXIT、EXIT WHEN、CONTINUE、GOTO
+2.4.1EXIT：立即退出循环
+BEGIN
+    LOOP
+        EXIT;
+        DBMS_OUTPUT.PUT_LINE('这行代码不会被执行');
+    END LOOP;
+END;
+2.4.2 EXIT WHEN
+DECLARE
+    v_counter NUMBER := 1;
+BEGIN
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('计数器值：' || v_counter);
+        v_counter := v_counter + 1;
+        EXIT WHEN v_counter > 5;
+    END LOOP;
+END;
+2.4.3 CONTINUE
+BEGIN
+    FOR i IN 1..5 LOOP
+        IF i = 3 THEN
+            CONTINUE;
+        END IF;
+        DBMS_OUTPUT.PUT_LINE('当前值：' || i);
+    END LOOP;
+END;
+2.4.4 CONTINUE WHEN
+BEGIN
+    FOR i IN 1..5 LOOP
+        CONTINUE WHEN i = 3;
+        DBMS_OUTPUT.PUT_LINE('当前值：' || i);
+    END LOOP;
+END;
+2.4.5 GOTO
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('开始');
+    GOTO skip;
+    DBMS_OUTPUT.PUT_LINE('这行代码不会被执行');
+    <<skip>>
+    DBMS_OUTPUT.PUT_LINE('跳转后执行的代码');
+END;
+
+
+3.嵌套流程控制：流程控制结构可以嵌套使用，例如在循环中包含条件语句，或在条件语句中包含循环
+DECLARE
+    v_num NUMBER;
+BEGIN
+    FOR v_num IN 2..10 LOOP
+        DBMS_OUTPUT.PUT_LINE('当前数字：' || v_num);
+        IF MOD(v_num, 2) = 0 THEN
+            DBMS_OUTPUT.PUT_LINE(v_num || ' 是偶数');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE(v_num || ' 是奇数');
+        END IF;
+    END LOOP;
+END;
+
+4.异常处理中的流程控制
+BEGIN
+    -- 故意引发一个除零错误
+    DECLARE
+        v_result NUMBER;
+    BEGIN
+        v_result := 10 / 0;
+    END;
+EXCEPTION
+    WHEN ZERO_DIVIDE THEN
+        DBMS_OUTPUT.PUT_LINE('发生了除零错误');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('发生了其他错误');
+END;
+
+5.实践示例
+5.1 计算1到10的累加和
+DECLARE
+    v_sum NUMBER := 0;
+BEGIN
+    FOR i IN 1..10 LOOP
+        v_sum := v_sum + i;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('1到10的累加和为：' || v_sum);
+END;
+5.2 输出九九乘法表
+BEGIN
+    FOR i IN 1..9 LOOP
+        FOR j IN 1..9 LOOP
+            IF j > i THEN
+                EXIT;
+            END IF;
+            DBMS_OUTPUT.PUT(i || '×' || j || '=' || (i*j) || '  ');
+        END LOOP;
+        DBMS_OUTPUT.NEW_LINE;
+    END LOOP;
+END;
+
+6.总结
+
+条件控制结构：使用 IF 和 CASE 语句，根据不同条件执行不同的代码块。
+循环控制结构：使用 LOOP、WHILE LOOP、FOR LOOP 等语句，实现代码的重复执行。
+循环控制语句：EXIT、EXIT WHEN、CONTINUE、GOTO 等，用于控制循环的执行流程。
+嵌套使用：可以将条件语句和循环语句嵌套使用，构建复杂的逻辑。
+异常处理：在异常处理块中也可以使用流程控制语句，确保程序在发生错误时能够正确处理。
