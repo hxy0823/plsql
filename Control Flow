@@ -117,7 +117,7 @@ BEGIN
         EXIT WHEN v_counter > 5;
     END LOOP;
 END;
-2.4.3 CONTINUE
+2.4.3 CONTINUE：CONTINUE 和 CONTINUE WHEN 都用于跳过当前循环迭代，进入下一次循环。
 BEGIN
     FOR i IN 1..5 LOOP
         IF i = 3 THEN
