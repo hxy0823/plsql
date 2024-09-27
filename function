@@ -1,0 +1,92 @@
+1.fuction的基本语法
+CREATE [OR REPLACE] FUNCTION function_name
+   (parameter_name [IN | OUT | IN OUT] datatype, ...)
+   RETURN return_datatype
+IS
+   -- 局部变量声明
+BEGIN
+   -- 可执行语句
+   RETURN value;
+EXCEPTION
+   -- 异常处理部分
+END function_name;
+--------
+CREATE [OR REPLACE] FUNCTION function_name：创建或替换一个函数。
+parameter_name：参数名称。
+[IN | OUT | IN OUT]：参数类型（默认为 IN）。
+datatype：参数的数据类型，如 NUMBER、VARCHAR2。
+RETURN return_datatype：指定函数返回值的数据类型。
+IS 或 AS：用于开始函数体定义。
+BEGIN ... END：函数的可执行部分，包含逻辑操作和 RETURN 语句。
+EXCEPTION：异常处理部分，用于捕获和处理异常情况。
+
+2.函数的特点
+返回值：函数必须返回一个值。通过 RETURN 语句指定返回值的类型和内容。
+可嵌入性：函数可以在 SQL 语句中使用，比如 SELECT 语句、WHERE 条件、ORDER BY 子句等，可以作为表达式的一部分使用。
+输入参数：函数可以接收多个输入参数（IN 参数），用于在计算中使用。
+参数类型：
+IN：输入参数，传递给函数使用。
+OUT：输出参数，用于将值从函数返回给调用者（一般很少在函数中使用）。
+IN OUT：输入输出参数，既可以传递给函数使用，也可以用于返回计算后的值（函数中较少使用）。
+
+3.函数示例
+简单函数示例
+CREATE OR REPLACE FUNCTION get_employee_salary (
+   emp_id IN NUMBER
+) 
+RETURN NUMBER
+IS
+   emp_salary NUMBER;
+BEGIN
+   SELECT salary INTO emp_salary 
+   FROM employees 
+   WHERE employee_id = emp_id;
+   RETURN emp_salary;
+EXCEPTION
+   WHEN NO_DATA_FOUND THEN
+      RETURN NULL; -- 若无数据，则返回NULL
+END get_employee_salary;
+
+复杂函数示例
+CREATE OR REPLACE FUNCTION calculate_tax (
+   salary IN NUMBER
+) 
+RETURN NUMBER
+IS
+   tax_amount NUMBER;
+BEGIN
+   IF salary < 3000 THEN
+      tax_amount := salary * 0.05; -- 低于3000时税率为5%
+   ELSIF salary < 6000 THEN
+      tax_amount := salary * 0.1; -- 3000到6000之间时税率为10%
+   ELSE
+      tax_amount := salary * 0.15; -- 高于6000时税率为15%
+   END IF;
+   RETURN tax_amount;
+END calculate_tax;
+
+
+4.函数的示例
+函数在 SQL 语句中的使用
+SELECT employee_id, calculate_tax(salary) AS tax
+FROM employees
+WHERE calculate_tax(salary) > 500;
+
+5.函数与存储过程的区别
+函数与存储过程的区别
+返回值：
+函数必须返回一个值，可以嵌入到 SQL 语句中。
+存储过程没有返回值（可以使用 OUT 参数返回多个值），通常用于执行一系列操作。
+用途：
+函数用于计算和返回某个值，尤其是在 SQL 语句中。
+存储过程用于处理特定的业务逻辑，如数据插入、更新、删除操作。
+调用方式：
+函数可以在 SQL 语句中直接调用，如 SELECT 中。
+存储过程通过 EXEC 或 CALL 语句调用。
+
+6.函数的限制
+限制1：函数在 SQL 语句中使用时，不能有事务控制语句（如 COMMIT、ROLLBACK）。
+限制2：在 SQL 语句中使用的函数不能包含 DML 操作（如 INSERT、UPDATE、DELETE）。
+限制3：函数中的 RETURN 语句只能返回单一值，不能返回 TABLE 或 RECORD 类型（可以通过 PIPELINED 函数返回多行数据）。
+
+
