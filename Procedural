@@ -50,29 +50,35 @@ END;
 ----
 4.复杂的存储过程
 //复杂存储过程
+/**
+ * @procedure calculate_department_avg_salary
+ * @description 计算每个部门的平均薪资，并将结果存储到 dept_avg_salary 汇总表中。
+ *              如果汇总表中已存在该部门的记录，则更新其平均薪资；否则，插入新的记录。
+ * @param 无
+ * @return 无
+ */
 CREATE OR REPLACE PROCEDURE calculate_department_avg_salary AS
-    CURSOR dept_cur IS
-        SELECT department_id
-        FROM departments;
-    
-    v_department_id departments.department_id%TYPE;
-    v_avg_salary NUMBER;
 BEGIN
-    FOR dept_rec IN dept_cur LOOP
-        SELECT AVG(salary)
-        INTO v_avg_salary
-        FROM employees
-        WHERE department_id = dept_rec.department_id;
-        
-        -- 插入或更新汇总表
+    FOR dept_rec IN (SELECT department_id, AVG(salary) AS avg_salary
+                     FROM employees
+                     GROUP BY department_id) LOOP
         BEGIN
-            INSERT INTO dept_avg_salary (department_id, avg_salary)
-            VALUES (dept_rec.department_id, v_avg_salary);
+            -- 尝试更新现有记录
+            UPDATE dept_avg_salary
+            SET avg_salary = dept_rec.avg_salary
+            WHERE department_id = dept_rec.department_id;
+            
+            IF SQL%ROWCOUNT = 0 THEN
+                -- 如果没有行被更新，插入新记录
+                INSERT INTO dept_avg_salary (department_id, avg_salary)
+                VALUES (dept_rec.department_id, dept_rec.avg_salary);
+            END IF;
         EXCEPTION
-            WHEN DUP_VAL_ON_INDEX THEN
-                UPDATE dept_avg_salary
-                SET avg_salary = v_avg_salary
-                WHERE department_id = dept_rec.department_id;
+            WHEN OTHERS THEN
+                -- 记录异常日志（假设有 error_log 表）
+                INSERT INTO error_log (error_message, error_time)
+                VALUES (SQLERRM, SYSDATE);
+                RAISE;
         END;
     END LOOP;
     
@@ -82,3 +88,12 @@ EXCEPTION
         ROLLBACK;
         RAISE;
 END calculate_department_avg_salary;
+----调用示例
+BEGIN
+    calculate_department_avg_salary;
+    DBMS_OUTPUT.PUT_LINE('部门平均薪资计算并更新成功。');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('发生错误：' || SQLERRM);
+END;
+/
