@@ -1,0 +1,38 @@
+MERGE 语句是一种非常有用的 DML（数据操纵语言）操作，
+它结合了 INSERT 和 UPDATE 语句的功能，用于在一个表中根据另一个表的数据来插入或更新记录。
+MERGE 语句通常用于将数据同步或合并到目标表中。
+---merge的基本语句
+
+MERGE INTO target_table t
+USING source_table s
+ON (t.column1 = s.column1)
+WHEN MATCHED THEN
+    UPDATE SET t.column2 = s.column2, t.column3 = s.column3
+WHEN NOT MATCHED THEN
+    INSERT (t.column1, t.column2, t.column3)
+    VALUES (s.column1, s.column2, s.column3);
+-----
+target_table: 目标表，即需要插入或更新的表。
+source_table: 源表，即提供数据的表。
+ON (condition): 匹配条件，用于指定如何在目标表和源表中查找匹配的记录。
+WHEN MATCHED THEN: 指定当目标表中存在匹配的记录时的操作，通常是 UPDATE。
+WHEN NOT MATCHED THEN: 指定当目标表中不存在匹配记录时的操作，通常是 INSERT。
+-----
+举例：假设有两个表：employees 和 employees_new。
+employees 是旧的员工数据表，employees_new 是最新的员工数据表。
+我们需要将 employees_new 表的数据合并到 employees 表中，
+如果 employees 中存在相同 employee_id 的记录则更新，不存在则插入。
+
+
+MERGE INTO employees e
+USING employees_new en
+ON (e.employee_id = en.employee_id)
+WHEN MATCHED THEN
+    UPDATE SET
+        e.first_name = en.first_name,
+        e.last_name = en.last_name,
+        e.email = en.email,
+        e.salary = en.salary
+WHEN NOT MATCHED THEN
+    INSERT (e.employee_id, e.first_name, e.last_name, e.email, e.salary)
+    VALUES (en.employee_id, en.first_name, en.last_name, en.email, en.salary);
