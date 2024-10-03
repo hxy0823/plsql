@@ -7,11 +7,48 @@
 
 1.1标量数据类型
 1.1.1数值类型（NUMBER）
-v_integer NUMBER := 100;
-v_decimal NUMBER(10, 2) := 12345.67;
-字符类型（CHAR, VARCHAR2, NCHAR, NVARCHAR2）
-日期/时间类型（DATE, TIMESTAMP, INTERVAL）
-布尔类型（BOOLEAN）
+DECLARE
+   -- 数值类型
+   v_number NUMBER := 100;
+   v_integer INTEGER := 10;
+   v_float   BINARY_FLOAT := 12.34;
+
+   -- 字符类型
+   v_char CHAR(10) := 'A';
+   v_varchar VARCHAR2(20) := 'Hello PL/SQL';
+
+   -- 布尔类型
+   v_boolean BOOLEAN := TRUE;
+
+   -- 日期类型
+   v_date    DATE := SYSDATE;
+
+   -- 时间戳类型
+   v_timestamp TIMESTAMP := SYSTIMESTAMP;
+
+BEGIN
+   -- 输出数值类型
+   DBMS_OUTPUT.PUT_LINE('Number: ' || v_number);
+   DBMS_OUTPUT.PUT_LINE('Integer: ' || v_integer);
+   DBMS_OUTPUT.PUT_LINE('Float: ' || v_float);
+
+   -- 输出字符类型
+   DBMS_OUTPUT.PUT_LINE('Char: ' || v_char);
+   DBMS_OUTPUT.PUT_LINE('Varchar: ' || v_varchar);
+
+   -- 输出布尔类型
+   IF v_boolean THEN
+      DBMS_OUTPUT.PUT_LINE('Boolean: TRUE');
+   ELSE
+      DBMS_OUTPUT.PUT_LINE('Boolean: FALSE');
+   END IF;
+
+   -- 输出日期和时间戳类型
+   DBMS_OUTPUT.PUT_LINE('Date: ' || TO_CHAR(v_date, 'YYYY-MM-DD HH24:MI:SS'));
+   DBMS_OUTPUT.PUT_LINE('Timestamp: ' || TO_CHAR(v_timestamp, 'YYYY-MM-DD HH24:MI:SS.FF'));
+
+END;
+）
 
 1.2复合数据类型
 1.2.1记录类型（RECORD）
