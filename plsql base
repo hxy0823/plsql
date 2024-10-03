@@ -70,44 +70,80 @@ END;
 1.2复合数据类型
 1.2.1记录类型（RECORD）
 DECLARE
-  TYPE employee_rec IS RECORD (
-    employee_id NUMBER,
-    first_name VARCHAR2(50),
-    last_name  VARCHAR2(50)
-  );
-  v_employee employee_rec;
+   -- 定义一个记录类型
+   TYPE employee_record IS RECORD (
+      emp_id    NUMBER(6),
+      emp_name  VARCHAR2(50),
+      salary    NUMBER(8,2),
+      hire_date DATE
+   );
+   
+   -- 声明一个基于记录类型的变量
+   v_employee employee_record;
 BEGIN
-  -- 使用记录
+   -- 给记录变量赋值
+   v_employee.emp_id := 101;
+   v_employee.emp_name := 'John Doe';
+   v_employee.salary := 5000.50;
+   v_employee.hire_date := SYSDATE;
+   
+   -- 输出记录的字段
+   DBMS_OUTPUT.PUT_LINE('Employee ID: ' || v_employee.emp_id);
+   DBMS_OUTPUT.PUT_LINE('Employee Name: ' || v_employee.emp_name);
+   DBMS_OUTPUT.PUT_LINE('Salary: ' || v_employee.salary);
+   DBMS_OUTPUT.PUT_LINE('Hire Date: ' || TO_CHAR(v_employee.hire_date, 'YYYY-MM-DD'));
 END;
 
+
 1.2.2集合类型（TABLE, VARRAY, ASSOCIATIVE ARRAY）
-TABLE（嵌套表）：类似于SQL中的表，可以动态扩展。
--- 定义嵌套表
-TYPE number_table IS TABLE OF NUMBER;
-v_numbers number_table := number_table();
+----table类型
+DECLARE
+   -- 定义嵌套表类型
+   TYPE number_table IS TABLE OF NUMBER;
+   
+   -- 声明一个基于嵌套表类型的变量
+   v_numbers number_table := number_table();
+BEGIN
+   -- 给嵌套表添加元素
+   v_numbers.EXTEND; -- 扩展嵌套表的大小
+   v_numbers(1) := 100;
+
+   v_numbers.EXTEND;
+   v_numbers(2) := 200;
+
+   v_numbers.EXTEND;
+   v_numbers(3) := 300;
+   
+   -- 输出嵌套表的元素
+   FOR i IN 1..v_numbers.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE('Number: ' || v_numbers(i));
+   END LOOP;
+END;
 
 
-VARRAY（变长数组）：具有固定大小的数组。
--- 定义VARRAY
-TYPE varchar_varray IS VARRAY(10) OF VARCHAR2(50);
-v_names varchar_varray := varchar_varray();
+--array数组
+DECLARE
+   -- 定义一个 VARRAY 类型，最多包含 5 个数字
+   TYPE number_varray IS VARRAY(5) OF NUMBER;
+   
+   -- 声明一个基于 VARRAY 类型的变量
+   v_numbers number_varray := number_varray(100, 200, 300);
+BEGIN
+   -- 输出 VARRAY 的元素
+   FOR i IN 1..v_numbers.COUNT LOOP
+      DBMS_OUTPUT.PUT_LINE('Number: ' || v_numbers(i));
+   END LOOP;
+   
+   -- 更新 VARRAY 的元素
+   v_numbers(2) := 250;
+   DBMS_OUTPUT.PUT_LINE('Updated second element: ' || v_numbers(2));
+END;
 
 
-ASSOCIATIVE ARRAY（关联数组）：键值对集合，键可以是整数或字符串。
--- 定义关联数组
-TYPE assoc_array IS TABLE OF VARCHAR2(50) INDEX BY PLS_INTEGER;
-v_assoc assoc_array;
 
 1.2.3游标：看另一篇关于游标的详细讲解
 1.2.4大对象类型：如 BLOB、CLOB
-1.2.5变量命名规则
-字母和数字：变量名必须以字母开头，可以包含字母、数字和下划线（_）。
-长度限制：最长可达30个字符。
-不区分大小写：V_NAME和v_name被视为相同。
-保留字：不能使用PL/SQL的保留字作为变量名（如BEGIN、END、SELECT等）。
-命名风格：
-有意义的名称：变量名应反映其用途，如v_salary表示存储薪资。
-前缀：常用前缀如v_（变量）、c_（常量）、p_（参数）等
+
 
 2.运算符与表达式
 算术运算符：+、-、*、/、**（乘方）
@@ -137,84 +173,5 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('String Value: ' || v_str);
 END;
 
-4.示例代码
-4.1：基本变量声明与使用
-DECLARE
-  v_employee_id NUMBER := 101;
-  v_first_name  VARCHAR2(50) := '张';
-  v_last_name   VARCHAR2(50) := '三';
-  v_salary      NUMBER;
-  v_is_active   BOOLEAN := TRUE;
-BEGIN
-  -- 赋值操作
-  v_salary := 5000;
-
-  -- 使用变量
-  DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_employee_id);
-  DBMS_OUTPUT.PUT_LINE('姓名: ' || v_first_name || ' ' || v_last_name);
-  DBMS_OUTPUT.PUT_LINE('薪资: ' || v_salary);
-  
-  IF v_is_active THEN
-    DBMS_OUTPUT.PUT_LINE('员工状态: 活跃');
-  ELSE
-    DBMS_OUTPUT.PUT_LINE('员工状态: 非活跃');
-  END IF;
-END;
-
-
-4.2：使用不同数据类型
-DECLARE
-  v_number      NUMBER := 12345.678;
-  v_char        CHAR(10) := 'PL/SQL';
-  v_varchar     VARCHAR2(20) := 'Oracle';
-  v_date        DATE := SYSDATE;
-  v_timestamp   TIMESTAMP := SYSTIMESTAMP;
-  v_flag        BOOLEAN := FALSE;
-BEGIN
-  DBMS_OUTPUT.PUT_LINE('Number: ' || v_number);
-  DBMS_OUTPUT.PUT_LINE('Char: ' || v_char);
-  DBMS_OUTPUT.PUT_LINE('Varchar2: ' || v_varchar);
-  DBMS_OUTPUT.PUT_LINE('Date: ' || TO_CHAR(v_date, 'YYYY-MM-DD'));
-  DBMS_OUTPUT.PUT_LINE('Timestamp: ' || TO_CHAR(v_timestamp, 'YYYY-MM-DD HH24:MI:SS.FF'));
-  
-  IF v_flag THEN
-    DBMS_OUTPUT.PUT_LINE('Flag is TRUE');
-  ELSE
-    DBMS_OUTPUT.PUT_LINE('Flag is FALSE');
-  END IF;
-END;
-4.3：复合数据类型 - RECORD
-DECLARE
-  TYPE employee_rec IS RECORD (
-    employee_id NUMBER,
-    first_name  VARCHAR2(50),
-    last_name   VARCHAR2(50),
-    salary      NUMBER
-  );
-  
-  v_employee employee_rec;
-BEGIN
-  -- 赋值
-  v_employee.employee_id := 102;
-  v_employee.first_name  := '李';
-  v_employee.last_name   := '四';
-  v_employee.salary      := 6000;
-  
-  -- 使用记录
-  DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_employee.employee_id);
-  DBMS_OUTPUT.PUT_LINE('姓名: ' || v_employee.first_name || ' ' || v_employee.last_name);
-  DBMS_OUTPUT.PUT_LINE('薪资: ' || v_employee.salary);
-END;
-
-
-4.4：集合类型 - VARRAY
-DECLARE
-  TYPE varchar_varray IS VARRAY(5) OF VARCHAR2(50);
-  v_names varchar_varray := varchar_varray('张', '李', '王', '赵', '孙');
-BEGIN
-  FOR i IN 1..v_names.COUNT LOOP
-    DBMS_OUTPUT.PUT_LINE('姓名 ' || i || ': ' || v_names(i));
-  END LOOP;
-END;
 
 
