@@ -1,3 +1,13 @@
+1.plsql的基本语法
+DECLARE
+    -- 声明部分：声明变量、常量、游标等
+BEGIN
+    -- 执行部分：包含 SQL 语句和 PL/SQL 语句
+EXCEPTION
+    -- 异常处理部分：处理运行时错误
+END;
+
+
 /*
 plsql的命名规则
 1. 变量名称的基本规则
@@ -15,15 +25,15 @@ c_ 用于字符类型变量，如 c_name。
 d_ 用于日期类型变量，如 d_hire_date。
 */
 
-1.变量与数据类型
+2.变量与数据类型
 常用数据类型：
 标量类型：如 NUMBER、VARCHAR2、DATE、BOOLEAN。
 复合类型：如记录（RECORD）、集合（TABLE、VARRAY）。
 引用类型：如游标变量。
 大对象类型：如 BLOB、CLOB
 
-1.1标量数据类型
-1.1.1数值类型（NUMBER）
+2.1标量数据类型
+2.1.1数值类型（NUMBER）
 DECLARE
    -- 数值类型
    v_number NUMBER := 100;
@@ -67,8 +77,8 @@ BEGIN
 END;
 ）
 
-1.2复合数据类型
-1.2.1记录类型（RECORD）
+2.2复合数据类型
+2.2.1记录类型（RECORD）
 DECLARE
    -- 定义一个记录类型
    TYPE employee_record IS RECORD (
@@ -95,7 +105,7 @@ BEGIN
 END;
 
 
-1.2.2集合类型（TABLE, VARRAY, ASSOCIATIVE ARRAY）
+2.2.2集合类型（TABLE, VARRAY, ASSOCIATIVE ARRAY）
 ----table类型
 DECLARE
    -- 定义嵌套表类型
@@ -141,19 +151,19 @@ END;
 
 
 
-1.2.3游标：看另一篇关于游标的详细讲解
-1.2.4大对象类型：如 BLOB、CLOB
+2.2.3游标：看另一篇关于游标的详细讲解
+2.2.4大对象类型：如 BLOB、CLOB
 
 
-2.运算符与表达式
+3.运算符与表达式
 算术运算符：+、-、*、/、**（乘方）
 比较运算符：=、!=、<>、>、<、>=、<=
 逻辑运算符：AND、OR、NOT
 字符串运算符：||（连接符）
 
 
-3.数据类型转换
-3.1显式转换
+4.数据类型转换
+4.1显式转换
 TO_CHAR：将数值或日期转换为字符串
 v_str := TO_CHAR(v_number);
 v_date_str := TO_CHAR(v_date, 'YYYY-MM-DD');
@@ -164,7 +174,7 @@ v_number := TO_NUMBER(v_str);
 TO_DATE：将字符串转换为日期。
 v_date := TO_DATE('2024-01-01', 'YYYY-MM-DD');
 
-3.2隐式转换
+4.2隐式转换
 DECLARE
   v_number NUMBER := 100;
   v_str    VARCHAR2(10);
