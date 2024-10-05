@@ -81,6 +81,11 @@ BEGIN
 END;
 
 2.2WHILE LOOP
+基本语法：
+WHILE 条件 LOOP
+  -- 执行的代码
+END LOOP;
+例子：
 DECLARE
     v_counter NUMBER := 1;
 BEGIN
@@ -91,6 +96,12 @@ BEGIN
 END;
 
 2.3FOR LOOP
+基本语法:
+FOR 变量 IN [REVERSE] 起始值..结束值 LOOP
+  -- 执行的代码
+END LOOP;
+
+例子；
 DECLARE
 BEGIN
   -- 使用FOR循环遍历1到5
@@ -107,6 +118,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('这行代码不会被执行');
     END LOOP;
 END;
+
 2.4.2 EXIT WHEN
 DECLARE
     v_counter NUMBER := 1;
@@ -126,6 +138,8 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('当前值：' || i);
     END LOOP;
 END;
+
+
 2.4.4 CONTINUE WHEN
 BEGIN
     FOR i IN 1..5 LOOP
@@ -133,6 +147,8 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('当前值：' || i);
     END LOOP;
 END;
+
+
 2.4.5 GOTO
 BEGIN
     DBMS_OUTPUT.PUT_LINE('开始');
@@ -156,6 +172,9 @@ BEGIN
         END IF;
     END LOOP;
 END;
+
+mod函数是取余
+
 
 4.异常处理中的流程控制
 BEGIN
