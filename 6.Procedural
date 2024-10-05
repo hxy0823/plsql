@@ -24,7 +24,7 @@ CREATE OR REPLACE PROCEDURE get_employee_name (
     p_last_name OUT employees.last_name%TYPE
 ) AS
 BEGIN
-    SELECT first_name, last_name
+    SELECT first_name, last_name    
     INTO p_first_name, p_last_name
     FROM employees
     WHERE employee_id = p_employee_id;
