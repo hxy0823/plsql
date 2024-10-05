@@ -1,0 +1,245 @@
+区别：
+1.函数只能返回一个值
+  存储过程能返回多个值
+2.函数只能再sql语句中使用，存储过程不需要sql语句就能调用
+
+
+调用函数
+1.1创建一个function函数
+示例：创建一个函数 calculate_bonus，根据员工的薪资计算奖金。
+CREATE OR REPLACE FUNCTION calculate_bonus (
+    p_emp_id IN emp.id%TYPE
+) RETURN NUMBER
+IS
+    v_salary emp.salary%TYPE;
+    v_bonus NUMBER;
+BEGIN
+    -- 查询员工的薪资
+    SELECT salary INTO v_salary FROM emp WHERE id = p_emp_id;
+
+    -- 根据薪资计算奖金
+    IF v_salary > 5000 THEN
+        v_bonus := v_salary * 0.10; -- 10% 奖金
+    ELSIF v_salary > 3000 THEN
+        v_bonus := v_salary * 0.05; -- 5% 奖金
+    ELSE
+        v_bonus := 0; -- 无奖金
+    END IF;
+
+    RETURN v_bonus;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- 如果未找到员工，返回 NULL
+        RETURN NULL;
+    WHEN TOO_MANY_ROWS THEN
+        -- 如果找到多于一个员工，返回 NULL 并记录错误
+        DBMS_OUTPUT.PUT_LINE('错误: 查询返回多于一条记录。');
+        RETURN NULL;
+    WHEN OTHERS THEN
+        -- 捕获所有其他异常，返回 NULL
+        DBMS_OUTPUT.PUT_LINE('未知错误: ' || SQLERRM);
+        RETURN NULL;
+END calculate_bonus;
+/
+
+1.2 调用函数
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_emp_id emp.id%TYPE := 1001; -- 假设员工ID为1001
+    v_bonus NUMBER;
+BEGIN
+    v_bonus := calculate_bonus(v_emp_id);
+    
+    IF v_bonus IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id || ' 的奖金是: ' || v_bonus);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('未找到员工ID为 ' || v_emp_id || ' 的记录或发生错误。');
+    END IF;
+END;
+/
+
+
+调用存储过程
+2.1创建一个存储过程
+示例：创建一个存储过程 get_employee_details，根据员工ID获取员工的名字和薪资
+CREATE OR REPLACE PROCEDURE get_employee_details (
+    p_emp_id IN emp.id%TYPE,
+    p_first_name OUT emp.first_name%TYPE,
+    p_last_name OUT emp.last_name%TYPE,
+    p_salary OUT emp.salary%TYPE
+) AS
+BEGIN
+    -- 查询员工的名字和薪资
+    SELECT first_name, last_name, salary 
+    INTO p_first_name, p_last_name, p_salary
+    FROM emp
+    WHERE id = p_emp_id;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- 如果未找到员工，返回默认值
+        p_first_name := 'Not Found';
+        p_last_name := 'Not Found';
+        p_salary := NULL;
+    WHEN TOO_MANY_ROWS THEN
+        -- 如果找到多于一个员工，返回错误值
+        p_first_name := 'Error';
+        p_last_name := 'Error';
+        p_salary := NULL;
+    WHEN OTHERS THEN
+        -- 捕获所有其他异常，返回错误值
+        p_first_name := 'Error';
+        p_last_name := 'Error';
+        p_salary := NULL;
+END get_employee_details;
+/
+
+2.2调用存储过程
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_emp_id emp.id%TYPE := 1001; -- 假设员工ID为1001
+    v_first_name emp.first_name%TYPE;
+    v_last_name emp.last_name%TYPE;
+    v_salary emp.salary%TYPE;
+BEGIN
+    -- 调用存储过程
+    get_employee_details(
+        p_emp_id => v_emp_id,
+        p_first_name => v_first_name,
+        p_last_name => v_last_name,
+        p_salary => v_salary
+    );
+    
+    -- 输出结果
+    DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id);
+    DBMS_OUTPUT.PUT_LINE('名字: ' || v_first_name);
+    DBMS_OUTPUT.PUT_LINE('姓氏: ' || v_last_name);
+    IF v_salary IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('薪资: ' || v_salary);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('薪资: 未知');
+    END IF;
+END;
+/
+
+2.3 在 SQL*Plus 中调用存储过程
+-- 定义变量
+VARIABLE v_first_name VARCHAR2(50);
+VARIABLE v_last_name VARCHAR2(50);
+VARIABLE v_salary NUMBER;
+
+-- 调用存储过程
+EXEC get_employee_details(1001, :v_first_name, :v_last_name, :v_salary);
+
+-- 显示结果
+PRINT v_first_name
+PRINT v_last_name
+PRINT v_salary
+
+
+3.综合示例
+函数 calculate_bonus：根据薪资计算奖金。
+存储过程 get_employee_details：获取员工的详细信息。
+综合应用：调用存储过程获取员工信息，并使用函数计算奖金。
+3.1 创建函数
+CREATE OR REPLACE FUNCTION calculate_bonus (
+    p_emp_id IN emp.id%TYPE
+) RETURN NUMBER
+IS
+    v_salary emp.salary%TYPE;
+    v_bonus NUMBER;
+BEGIN
+    -- 查询员工的薪资
+    SELECT salary INTO v_salary FROM emp WHERE id = p_emp_id;
+
+    -- 根据薪资计算奖金
+    IF v_salary > 5000 THEN
+        v_bonus := v_salary * 0.10; -- 10% 奖金
+    ELSIF v_salary > 3000 THEN
+        v_bonus := v_salary * 0.05; -- 5% 奖金
+    ELSE
+        v_bonus := 0; -- 无奖金
+    END IF;
+
+    RETURN v_bonus;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+    WHEN TOO_MANY_ROWS THEN
+        DBMS_OUTPUT.PUT_LINE('错误: 查询返回多于一条记录。');
+        RETURN NULL;
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('未知错误: ' || SQLERRM);
+        RETURN NULL;
+END calculate_bonus;
+/
+3.2 创建存储过程
+CREATE OR REPLACE PROCEDURE get_employee_details (
+    p_emp_id IN emp.id%TYPE,
+    p_first_name OUT emp.first_name%TYPE,
+    p_last_name OUT emp.last_name%TYPE,
+    p_salary OUT emp.salary%TYPE
+) AS
+BEGIN
+    -- 查询员工的名字和薪资
+    SELECT first_name, last_name, salary 
+    INTO p_first_name, p_last_name, p_salary
+    FROM emp
+    WHERE id = p_emp_id;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- 如果未找到员工，返回默认值
+        p_first_name := 'Not Found';
+        p_last_name := 'Not Found';
+        p_salary := NULL;
+    WHEN TOO_MANY_ROWS THEN
+        -- 如果找到多于一个员工，返回错误值
+        p_first_name := 'Error';
+        p_last_name := 'Error';
+        p_salary := NULL;
+    WHEN OTHERS THEN
+        -- 捕获所有其他异常，返回错误值
+        p_first_name := 'Error';
+        p_last_name := 'Error';
+        p_salary := NULL;
+END get_employee_details;
+/
+3.3 综合应用示例
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_emp_id emp.id%TYPE := 1001; -- 输入的员工ID
+    v_first_name emp.first_name%TYPE;
+    v_last_name emp.last_name%TYPE;
+    v_salary emp.salary%TYPE;
+    v_bonus NUMBER;
+BEGIN
+    -- 调用存储过程获取员工信息
+    get_employee_details(
+        p_emp_id => v_emp_id,
+        p_first_name => v_first_name,
+        p_last_name => v_last_name,
+        p_salary => v_salary
+    );
+
+    -- 检查是否成功获取到员工信息
+    IF v_salary IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('员工ID: ' || v_emp_id);
+        DBMS_OUTPUT.PUT_LINE('姓名: ' || v_first_name || ' ' || v_last_name);
+        DBMS_OUTPUT.PUT_LINE('薪资: ' || v_salary);
+
+        -- 调用函数计算奖金
+        v_bonus := calculate_bonus(v_emp_id);
+
+        IF v_bonus IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('奖金: ' || v_bonus);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('无法计算奖金。');
+        END IF;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('未找到员工ID为 ' || v_emp_id || ' 的记录。');
+    END IF;
+END;
+/
+
