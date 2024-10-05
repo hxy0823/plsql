@@ -4,7 +4,7 @@ NO_DATA_FOUND：当SELECT INTO语句未返回任何行时触发。
 TOO_MANY_ROWS：当SELECT INTO语句返回多于一行时触发
 ZERO_DIVIDE：当程序试图除以零时触发。
 -------
-VALUE_ERROR:当发生值错误，如类型不匹配、溢出等时触发
+VALUE_ERROR: 当发生值错误，如类型不匹配、溢出等时触发
 DECLARE
   v_num NUMBER;
 BEGIN
@@ -24,6 +24,7 @@ END;
 --------
 LOGIN_DENIED：当用户登录被拒绝时触发。
 OTHERS：捕获所有未被其他WHEN子句捕获的异常。
+
 
 1.2用户定义异常
 1.2.1基本模式：
