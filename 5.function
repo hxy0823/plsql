@@ -52,7 +52,7 @@ CREATE OR REPLACE FUNCTION calculate_tax (
    salary IN NUMBER
 ) 
 RETURN NUMBER
-IS
+IS   
    tax_amount NUMBER;
 BEGIN
    IF salary < 3000 THEN
@@ -64,6 +64,45 @@ BEGIN
    END IF;
    RETURN tax_amount;
 END calculate_tax;
+
+
+例子2：
+CREATE OR REPLACE FUNCTION finish_sal(p_id IN NUMBER)
+RETURN NUMBER
+IS 
+  v_sal NUMBER;
+BEGIN
+  -- 获取员工的薪资
+  SELECT sal 
+  INTO v_sal 
+  FROM emp 
+  WHERE id = p_id;
+
+  -- 根据薪资调整比例
+  IF v_sal > 3000 THEN
+    v_sal := v_sal * 0.6;
+  ELSIF v_sal > 2000 THEN
+    v_sal := v_sal * 0.8;
+  ELSE 
+    -- 薪资未变，可以选择不做任何操作
+    NULL;  -- 或者根据需求执行其他操作
+  END IF;
+
+  RETURN v_sal;
+EXCEPTION 
+  WHEN NO_DATA_FOUND THEN 
+    -- 未找到员工记录
+    RETURN NULL;
+  WHEN TOO_MANY_ROWS THEN
+    -- 查询返回多于一条记录
+    DBMS_OUTPUT.PUT_LINE('错误: 查询返回多于一条员工记录。');
+    RETURN NULL;
+  WHEN OTHERS THEN
+    -- 捕获所有其他异常
+    DBMS_OUTPUT.PUT_LINE('未知错误: ' || SQLERRM);
+    RETURN NULL;
+END finish_sal;
+/
 
 
 4.函数的示例
